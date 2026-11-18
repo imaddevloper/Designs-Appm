@@ -15,6 +15,41 @@ android {
         versionName = "1.0"
     }
 
+    // ✅ signingConfigs آمن: يتحقق من وجود الملف وكل المتغيرات قبل التطبيق
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("KEYSTORE_PATH")
+            val storePw = System.getenv("KEYSTORE_PASSWORD")
+            val alias = System.getenv("KEY_ALIAS")
+            val keyPw = System.getenv("KEY_PASSWORD")
+
+            // حل المسار: إذا كان مطلقاً، استخدمه كما هو. إذا نسبياً، نسبه لمجلد app/
+            val keystoreFile = keystorePath
+                ?.takeIf { it.isNotBlank() }
+                ?.let { file(it) }
+
+            val allSet = keystoreFile != null &&
+                    keystoreFile.exists() &&
+                    !storePw.isNullOrBlank() &&
+                    !alias.isNullOrBlank() &&
+                    !keyPw.isNullOrBlank()
+
+            if (allSet) {
+                storeFile = keystoreFile
+                storePassword = storePw
+                keyAlias = alias
+                keyPassword = keyPw
+                logger.lifecycle("✅ [signing] Release signing configured: ${keystoreFile!!.absolutePath}")
+            } else {
+                logger.warn("⚠️ [signing] Release signing NOT fully configured. APK will be UNSIGNED.")
+                logger.warn("   KEYSTORE_PATH = ${keystorePath ?: "null"} (exists=${keystoreFile?.exists() == true})")
+                logger.warn("   KEYSTORE_PASSWORD set = ${!storePw.isNullOrBlank()}")
+                logger.warn("   KEY_ALIAS set = ${!alias.isNullOrBlank()}")
+                logger.warn("   KEY_PASSWORD set = ${!keyPw.isNullOrBlank()}")
+            }
+        }
+    }
+
     buildFeatures {
         viewBinding = true
     }
@@ -26,21 +61,25 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    buildTypes {
+        getByName("release") {
+            // ✅ اربط التوقيع فقط إذا كان storeFile موجوداً فعلاً
+            val releaseSigning = signingConfigs.findByName("release")
+            if (releaseSigning?.storeFile != null) {
+                signingConfig = releaseSigning
+                logger.lifecycle("✅ [buildTypes] Release will be SIGNED")
+            } else {
+                logger.warn("⚠️ [buildTypes] Release will be UNSIGNED (signing not configured)")
+            }
+        }
+    }
 }
 
 dependencies {
-    // ✅ AppCompat (ضروري لـ AppCompatActivity والثيمات)
     implementation("androidx.appcompat:appcompat:1.7.0")
-
-    // ✅ Core KTX (مستخدم في MainActivity: ActivityCompat, ContextCompat)
     implementation("androidx.core:core-ktx:1.13.1")
-
-    // ✅ OkHttp (مستخدم في TelegramController و TelegramReporter)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-
-    // ✅ Coroutines (مستخدم في C2Service و FileExfil و غيرها)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-
-    // ✅ JSON (مستخدم في TelegramController و TelegramReporter)
     implementation("org.json:json:20240303")
 }
