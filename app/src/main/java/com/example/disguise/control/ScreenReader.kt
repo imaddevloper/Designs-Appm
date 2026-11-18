@@ -10,41 +10,38 @@ import android.view.accessibility.AccessibilityNodeInfo
  * يعتمد على AccessibilityHelper.instance.rootInActiveWindow،
  * لذا يجب أن تكون خدمة إمكانية الوصول مفعّلة قبل استخدامه.
  *
- * الفرق عن AccessibilityHelper.dump():
- * - dump() نسخة بسيطة (احتياطية).
- * - ScreenReader.dump() يعطي تفاصيل أكثر:
- *   * viewIdResourceName (معرّف العنصر، مثل com.app:id/button)
- *   * packageName (اسم التطبيق)
- *   * enabled / visible / scrollable / checkable / checked
- *   * الأبناء (children) بتسلسل هرمي أوضح
- * - يحدّ طول النص لتجنب رسائل تيليجرام ضخمة.
+ * الميزات:
+ * - dump(): شجرة كاملة بتفاصيل (class, text, id, bounds, خصائص).
+ * - quickSummary(): ملخص سريع للعناصر التفاعلية فقط.
  *
- * الاستخدام:
- *   val reader = ScreenReader()
- *   val text = reader.dump()
- *   reporter.sendMessage(text)
+ * حدود صارمة لتجنب:
+ * - شجرات عملاقة (MAX_DEPTH, MAX_NODES).
+ * - رسائل تيليجرام ضخمة (MAX_OUTPUT_LEN).
+ * - تسلسل لانهائي (safety checks).
+ *
+ * ⚠️ ملاحظة: walk() لم تعد inline (لأنها تكراريّة — Kotlin يمنع
+ * inline مع recursion). نستخدم IntArray(1) كعدّاد بدلاً من var مغلق.
  */
 class ScreenReader {
 
     companion object {
         private const val TAG = "ScreenReader"
 
-        /** أقصى عمق للتسلسل الهرمي (حماية من الشجرات العملاقة) */
+        /** أقصى عمق للتسلسل الهرمي */
         private const val MAX_DEPTH = 30
 
-        /** أقصى عدد عقد نعالجها (حماية من infinite loop) */
+        /** أقصى عدد عقد نعالجها */
         private const val MAX_NODES = 3000
 
-        /** أقصى طول نص لكل عقدة (لتجنب فوضى) */
+        /** أقصى طول نص لكل عقدة */
         private const val MAX_TEXT_LEN = 100
 
-        /** أقصى طول للناتج الكلي (لتجنب رسائل تيليجرام ضخمة) */
+        /** أقصى طول للناتج الكلي (أقل من حد تيليجرام 4096) */
         private const val MAX_OUTPUT_LEN = 3500
     }
 
     /**
      * يقرأ الشاشة الحالية ويعيدها كنص منسق.
-     * إذا لم تكن الخدمة مفعّلة، يعيد رسالة واضحة.
      */
     fun dump(): String {
         val service = AccessibilityHelper.instance
@@ -57,8 +54,10 @@ class ScreenReader {
         sb.append("📱 package: ").append(root.packageName ?: "?").append("\n")
         sb.append("═══════════════════════════\n")
 
-        var nodeCount = 0
-        walk(root, sb, 0) { nodeCount++ }
+        // ✅ عدّاد عبر IntArray (بديل آمن عن inline + var مغلق)
+        val counter = intArrayOf(0)
+        walk(root, sb, 0, counter)
+        val nodeCount = counter[0]
 
         sb.append("═══════════════════════════\n")
         sb.append("📊 إجمالي العقد: ").append(nodeCount).append("\n")
@@ -73,19 +72,21 @@ class ScreenReader {
     }
 
     /**
-     * السير على الشجرة بشكل تكراري (DFS) مع حد أقصى للعمق والعدد.
-     * نتوقف عن الإضافة إذا تجاوزنا MAX_OUTPUT_LEN (لتوفير الوقت).
+     * السير التكراري (DFS) على الشجرة.
+     * ✅ ليست inline (لأنها تكراريّة).
+     * العدّاد يُمرّر كـ IntArray(1) لتجنّب closures.
      */
-    private inline fun walk(
+    private fun walk(
         node: AccessibilityNodeInfo,
         sb: StringBuilder,
         depth: Int,
-        onNode: () -> Unit
+        counter: IntArray
     ) {
         if (depth > MAX_DEPTH) return
         if (sb.length > MAX_OUTPUT_LEN) return
+        if (counter[0] >= MAX_NODES) return
 
-        onNode()
+        counter[0]++
 
         val indent = "  ".repeat(depth)
         val cls = node.className?.toString()?.substringAfterLast('.') ?: "?"
@@ -124,13 +125,12 @@ class ScreenReader {
         // الأبناء
         for (i in 0 until node.childCount) {
             val child = node.getChild(i) ?: continue
-            walk(child, sb, depth + 1, onNode)
+            walk(child, sb, depth + 1, counter)
         }
     }
 
     /**
-     * تنظيف النص من الأحرف التي قد تكسر تنسيق تيليجرام
-     * أو تُفسد عرض السطر.
+     * تنظيف النص من الأحرف التي قد تكسر تنسيق تيليجرام.
      */
     private fun escape(s: String): String {
         return s
@@ -140,9 +140,8 @@ class ScreenReader {
     }
 
     /**
-     * إرجاع ملخص سريع للشاشة (للأوامر السريعة).
-     * يعيد فقط العناصر القابلة للنقر والكتابة، مع إحداثياتها.
-     * مفيد لأمر /quick (إن أضفته لاحقاً).
+     * ملخص سريع للشاشة: العناصر القابلة للنقر والكتابة فقط.
+     * مفيد لأمر /quick (إن أضفته لاحقاً إلى CommandHandler).
      */
     fun quickSummary(): String {
         val service = AccessibilityHelper.instance ?: return "⚠️ الخدمة غير مفعّلة"
