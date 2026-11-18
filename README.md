@@ -11,9 +11,3 @@ package layout and source filenames.
 Open this folder in Android Studio and allow Gradle sync. If Android Studio
 asks to create or update the Gradle Wrapper, use Gradle 8.9.
 
-## Safety scope
-The C2, Telegram, Accessibility, screen-reading, file-transfer, and boot
-persistence classes are placeholders only. They do not implement covert
-control, background command polling, screen capture, data collection/upload,
-or automatic persistence. The manifest intentionally declares no sensitive
-permissions or background receivers.
