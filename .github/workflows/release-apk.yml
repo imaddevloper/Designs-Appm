@@ -21,32 +21,149 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      # ✅ الخطوة المضافة 1: تثبيت Gradle
       - name: Install Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # ✅ الخطوة المضافة 2: توليد gradle wrapper
-      - name: Generate Gradle Wrapper
+      # ✅ إصلاح 1: تحقق من وجود gradlew نفسه، وليس ملف الخصائص فقط
+      - name: Ensure Gradle Wrapper
         run: |
-          gradle wrapper --gradle-version 8.9
-          chmod +x gradlew
+          set -e
+          if [ -x ./gradlew ] && [ -f gradle/wrapper/gradle-wrapper.properties ]; then
+            echo "✅ gradlew موجود وقابل للتنفيذ"
+          else
+            echo "⚠️ gradlew أو wrapper properties مفقود — سيتم توليده"
+            gradle wrapper --gradle-version 8.9
+          fi
+          chmod +x ./gradlew
+          ./gradlew --version
 
+      # ✅ التحقق من وجود السر قبل فك الترميز
+      - name: Validate Keystore Secret
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -e
+          [ -n "$KEYSTORE_BASE64" ] || { echo "::error::ANDROID_KEYSTORE_BASE64 فارغ."; exit 1; }
+          echo "✅ ANDROID_KEYSTORE_BASE64 موجود (${#KEYSTORE_BASE64} حرف)"
+
+      # ✅ فك الترميز + التحقق من صلاحية keystore
       - name: Decode Keystore
         id: decode_keystore
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
+          set -e
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
-          echo "keystore_path=$PWD/app/release.keystore" >> $GITHUB_OUTPUT
+          if ! keytool -list -keystore app/release.keystore \
+                -storepass "$KEYSTORE_PASSWORD" \
+                -alias "$KEY_ALIAS" > /dev/null 2>&1; then
+            echo "::error::keystore تالف، أو كلمة مرور المخزن/Alias غير صحيحة."
+            exit 1
+          fi
+          KEYSTORE_ABS="$(realpath app/release.keystore)"
+          echo "keystore_path=$KEYSTORE_ABS" >> $GITHUB_OUTPUT
+          echo "✅ Keystore صالح: $KEYSTORE_ABS"
 
+      # ✅ إصلاح 2: التحقق من كلمة مرور المفتاح الخاص (KEY_PASSWORD) فعلياً
+      - name: Verify Private Key Password
+        env:
+          KEYSTORE_PATH: ${{ steps.decode_keystore.outputs.keystore_path }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -e
+          TMP_CRT="$(mktemp --suffix=.csr)"
+          # keytool -certreq يحتاج كلمة مرور المفتاح الخاص، ويفشل إن كانت خاطئة
+          if keytool -certreq \
+                -alias "$KEY_ALIAS" \
+                -keystore "$KEYSTORE_PATH" \
+                -storepass "$KEYSTORE_PASSWORD" \
+                -keypass "$KEY_PASSWORD" \
+                -file "$TMP_CRT" > /dev/null 2>&1; then
+            rm -f "$TMP_CRT"
+            echo "✅ كلمة مرور المفتاح (KEY_PASSWORD) صحيحة"
+          else
+            rm -f "$TMP_CRT"
+            echo "::error::كلمة مرور المفتاح (KEY_PASSWORD) خاطئة أو Alias غير صالح."
+            exit 1
+          fi
+
+      # ✅ بناء Release
       - name: Build Release APK
         env:
           KEYSTORE_PATH: ${{ steps.decode_keystore.outputs.keystore_path }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease --stacktrace
 
-      - name: Upload APK
+      # ✅ إصلاح 3: اختيار APK بأولويات محددة (وليس head -n 1 عشوائي)
+      - name: Locate Release APK (priority-based)
+        id: locate_apk
+        run: |
+          set -e
+          echo "📦 محتويات مجلد release:"
+          find app/build/outputs/apk/release -maxdepth 2 -type f -name "*.apk" -print || true
+
+          APK_PATH=""
+          # الأولوية 1: app-release.apk (الاسم القياسي المتوقع)
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            APK_PATH="app/build/outputs/apk/release/app-release.apk"
+          # الأولوية 2: أي ملف *release*.apk يستثني *unsigned*
+          else
+            APK_PATH=$(find app/build/outputs/apk/release -maxdepth 2 -type f -name "*-release*.apk" ! -name "*unsigned*" | head -n 1)
+          fi
+          # الأولوية 3: أي APK غير unsigned (كملاذ أخير)
+          if [ -z "$APK_PATH" ]; then
+            APK_PATH=$(find app/build/outputs/apk/release -maxdepth 2 -type f -name "*.apk" ! -name "*unsigned*" | head -n 1)
+          fi
+
+          if [ -z "$APK_PATH" ]; then
+            echo "::error::لم يتم العثور على APK غير unsigned."
+            ls -la app/build/outputs/apk/release || true
+            exit 1
+          fi
+
+          # تطابق الاسم مع *unsigned* يعد مؤشر فشل توقيع
+          if echo "$APK_PATH" | grep -q "unsigned"; then
+            echo "::error::الـ APK المنتَج غير موقّع (unsigned). راجع signingConfigs."
+            exit 1
+          fi
+
+          echo "✅ تم اختيار APK: $APK_PATH"
+          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+
+      # ✅ التحقق الفعلي من التوقيع (باستخدام apksigner)
+      - name: Verify APK Signature
+        env:
+          APK_PATH: ${{ steps.locate_apk.outputs.apk_path }}
+        run: |
+          set -e
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          [ -n "$APKSIGNER" ] || { echo "::error::apksigner غير موجود."; exit 1; }
+
+          echo "🔍 استخدام: $APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK_PATH" || {
+            echo "::error::الـ APK غير موقّع! ($APK_PATH)"
+            exit 1
+          }
+          echo "✅ APK موقّع بشكل صحيح"
+
+      # ✅ رفع الـ APK بالمسار الديناميكي
+      - name: Upload Signed APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: app/build/outputs/apk/release/app-release.apk
+          path: ${{ steps.locate_apk.outputs.apk_path }}
+          if-no-files-found: error
+
+      # ✅ احتياطي (للتشخيص فقط، مع اسم واضح يمنع استخدامه كإصدار)
+      - name: Upload Raw APKs for Debug (DO NOT DISTRIBUTE)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: DEBUG-DO-NOT-DISTRIBUTE-release-apks
+          path: app/build/outputs/apk/release/**/*.apk
+          if-no-files-found: warn
