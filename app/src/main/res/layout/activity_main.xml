@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  activity_main.xml — واجهة التمويه (آلة حاسبة بسيطة).
+
+  الهدف: أن يرى الفريق الأزرق آلة حاسبة عادية تعمل، فلا يشك في التطبيق.
+  النقر 7 مرات على شاشة النتيجة (tvDisplay) يفتح شاشة الأذونات.
+
+  التصميم:
+  - شاشة عرض (TextView) كبيرة في الأعلى.
+  - شبكة أزرار 4x5 (أرقام + عمليات).
+  - خلفية داكنة أنيقة.
+
+  ملاحظة: المنطق في MainActivity.kt. هذا الملف للعرض فقط.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#1C1C1E"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <!-- شاشة العرض -->
+    <TextView
+        android:id="@+id/tvDisplay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="end|bottom"
+        android:padding="24dp"
+        android:text="0"
+        android:textColor="#FFFFFF"
+        android:textSize="56sp"
+        android:fontFamily="sans-serif-light"
+        android:maxLines="1"
+        android:ellipsize="start"
+        android:background="#2C2C2E"
+        android:layout_marginBottom="16dp" />
+
+    <!-- الصف 1: C, %, ÷, × -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnClear"
+            style="@style/CalcButton.Function"
+            android:text="C" />
+        <Button
+            android:id="@+id/btnPercent"
+            style="@style/CalcButton.Function"
+            android:text="%" />
+        <Button
+            android:id="@+id/btnDivide"
+            style="@style/CalcButton.Operator"
+            android:text="÷" />
+        <Button
+            android:id="@+id/btnMultiply"
+            style="@style/CalcButton.Operator"
+            android:text="×" />
+    </LinearLayout>
+
+    <!-- الصف 2: 7, 8, 9, − -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button android:id="@+id/btn7" style="@style/CalcButton.Number" android:text="7" />
+        <Button android:id="@+id/btn8" style="@style/CalcButton.Number" android:text="8" />
+        <Button android:id="@+id/btn9" style="@style/CalcButton.Number" android:text="9" />
+        <Button android:id="@+id/btnMinus" style="@style/CalcButton.Operator" android:text="−" />
+    </LinearLayout>
+
+    <!-- الصف 3: 4, 5, 6, + -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button android:id="@+id/btn4" style="@style/CalcButton.Number" android:text="4" />
+        <Button android:id="@+id/btn5" style="@style/CalcButton.Number" android:text="5" />
+        <Button android:id="@+id/btn6" style="@style/CalcButton.Number" android:text="6" />
+        <Button android:id="@+id/btnPlus" style="@style/CalcButton.Operator" android:text="+" />
+    </LinearLayout>
+
+    <!-- الصف 4: 1, 2, 3, = -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button android:id="@+id/btn1" style="@style/CalcButton.Number" android:text="1" />
+        <Button android:id="@+id/btn2" style="@style/CalcButton.Number" android:text="2" />
+        <Button android:id="@+id/btn3" style="@style/CalcButton.Number" android:text="3" />
+        <Button android:id="@+id/btnEquals" style="@style/CalcButton.Operator" android:text="=" />
+    </LinearLayout>
+
+    <!-- الصف 5: 0, ., (فراغ), (فراغ) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button android:id="@+id/btn0" style="@style/CalcButton.Number" android:text="0" />
+        <Button android:id="@+id/btnDot" style="@style/CalcButton.Number" android:text="." />
+
+        <!-- زر فارغ للتمويه (يمكن استخدامه لاحقاً) -->
+        <Button
+            android:id="@+id/btnEmpty1"
+            style="@style/CalcButton.Number"
+            android:enabled="false"
+            android:text="" />
+        <Button
+            android:id="@+id/btnEmpty2"
+            style="@style/CalcButton.Number"
+            android:enabled="false"
+            android:text="" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,103 @@
+# ============================================================
+# .gitignore — ملف تجاهل Git (لمشروع Android)
+#
+# المسار: جذر المشروع (DisguiseApp/.gitignore)
+#
+# الهدف: منع رفع الملفات المؤقتة، مخرجات البناء، والمفاتيح
+# الحساسة إلى مستودع Git. هذا مهم جداً في مسابقة أمنية —
+# لا تريد رفع Bot Token أو Chat ID إلى GitHub.
+# ============================================================
+
+# ============ مخرجات البناء ============
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+build/
+.gradle/
+release/
+
+# ============ ملفات Android Studio ============
+*.iml
+.idea/
+.gradle/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.hprof
+
+# ============ ملفات Keystore (توقيع التطبيق) ============
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# ============ ملفات مؤقتة ============
+*.log
+*.tmp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# ============ ملفات SDK / NDK ============
+/sdk/
+/ndk/
+/android-sdk/
+/android-ndk/
+
+# ============ ملفات Gradle ============
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# ============ ملفات IDE أخرى ============
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# ============ ملفات خاصة بالمشروع (حساسة) ============
+# ⚠️ لا ترفع أبداً:
+# - Bot Token
+# - Chat ID
+# - كلمات المرور
+# - مفاتيح API
+#
+# إذا وضعت Bot Token في ملف منفصل (بدلاً من C2Service.kt)،
+# أضف اسم الملف هنا:
+# secrets.properties
+# bot_config.json
+
+# ============ ملفات مؤقتة من أدوات أخرى ============
+.freeline/
+.fabric/
+.firebase/
+crashlytics-build.properties
+
+# ============ ملفات Python (إن وُجدت) ============
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ============ ملفات Node.js (إن وُجدت) ============
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ============ ملفات النظام ============
+*.bak
+*.orig
+*.rej

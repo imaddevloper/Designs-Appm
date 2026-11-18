@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  themes.xml — ثيم التطبيق (الوضع الفاتح).
+
+  المسار: app/src/main/res/values/themes.xml
+
+  ملاحظة: نستخدم Theme.AppCompat.Light.NoActionBar (من appcompat)
+  لتجنب شريط العنوان (ActionBar) الذي قد يكشف التطبيق.
+
+  الثيم الأساسي:
+  - خلفية بيضاء (افتراضي).
+  - بدون ActionBar.
+  - ألوان متوافقة مع الآلة الحاسبة.
+
+  ملاحظة: يمكنك تعديل الألوان لتناسب ذوقك، لكن التمويه الأفضل
+  هو ثيم محايد (لا يلفت الانتباه).
+-->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ============ الثيم الأساسي للتطبيق ============ -->
+    <style name="Theme.DisguiseApp" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- اللون الأساسي (يظهر في شريط الحالة) -->
+        <item name="colorPrimary">#1C1C1E</item>
+
+        <!-- اللون الأساسي الداكن (يظهر في شريط الحالة العلوي) -->
+        <item name="colorPrimaryDark">#000000</item>
+
+        <!-- لون التمييز (يظهر في العناصر التفاعلية) -->
+        <item name="colorAccent">#FF9500</item>
+
+        <!-- لون خلفية النافذة -->
+        <item name="android:windowBackground">#1C1C1E</item>
+
+        <!-- لون شريط الحالة -->
+        <item name="android:statusBarColor">#1C1C1E</item>
+
+        <!-- لون شريط التنقل (Android 8+) -->
+        <item name="android:navigationBarColor">#1C1C1E</item>
+
+        <!-- إخفاء ActionBar (مكرر للتأكيد) -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <!-- إعدادات إضافية للتوافق -->
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+    </style>
+
+    <!--
+      ملاحظة: Android Studio ينشئ أيضاً themes.xml في values-night/
+      (للثيم الداكن). إذا أردت تجاهل الوضع الداكن، احذف
+      values-night/themes.xml أو اجعله يطابق هذا الملف.
+    -->
+
+</resources>

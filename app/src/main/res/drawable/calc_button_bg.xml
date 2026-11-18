@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  calc_button_bg.xml — خلفية أزرار الأرقام (0-9, .).
+
+  المسار: app/src/main/res/drawable/calc_button_bg.xml
+
+  المظهر: مستطيل رمادي داكن بزوايا دائرية.
+  يُستخدم في styles.xml ضمن CalcButton.Number (وأيضاً كخلفية أساسية
+  لكل الأزرار لأن CalcButton.Number يرث من CalcButton).
+
+  ملاحظة: نستخدم <shape> بدلاً من <selector> لأننا لا نحتاج
+  تأثيراً عند الضغط (stateListAnimator=@null في styles.xml).
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- لون الخلفية: رمادي داكن -->
+    <solid android:color="#2C2C2E" />
+
+    <!-- زوايا دائرية -->
+    <corners android:radius="12dp" />
+
+</shape>
