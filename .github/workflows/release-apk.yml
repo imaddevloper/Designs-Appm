@@ -1,10 +1,10 @@
 name: Build Signed Release APK
 
 on:
-  workflow_dispatch: # يسمح بالتشغيل اليدوي من واجهة GitHub
+  workflow_dispatch:
   push:
     tags:
-      - 'v*' # أو أي وسم تريده
+      - 'v*'
 
 jobs:
   build:
@@ -21,8 +21,15 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      # ✅ الخطوة المضافة 1: تثبيت Gradle
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # ✅ الخطوة المضافة 2: توليد gradle wrapper
+      - name: Generate Gradle Wrapper
+        run: |
+          gradle wrapper --gradle-version 8.9
+          chmod +x gradlew
 
       - name: Decode Keystore
         id: decode_keystore
