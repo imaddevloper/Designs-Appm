@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#1C1C1E</color>
+    <!-- خلفية أيقونة التطبيق (الدرع السيبراني) -->
+    <color name="ic_launcher_background">#121212</color>
+    
+    <!-- الألوان الأساسية للتطبيق -->
+    <color name="cyber_dark">#121212</color>
+    <color name="cyber_cyan">#00E5FF</color>
 </resources>
