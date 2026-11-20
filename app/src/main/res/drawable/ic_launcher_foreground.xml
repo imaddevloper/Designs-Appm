@@ -4,17 +4,24 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- آلة حاسبة بسيطة -->
+    
+    <!-- الدرع الأمني (الخلفية) -->
     <path
-        android:fillColor="#FF9500"
-        android:pathData="M30,30h48v48h-48z" />
+        android:fillColor="#00E5FF"
+        android:pathData="M54,28 L74,38 L74,58 C74,70 64,80 54,84 C44,80 34,70 34,58 L34,38 Z" />
+        
+    <!-- الحافة الداخلية للدرع (لإعطاء تأثير ثلاثي الأبعاد) -->
+    <path
+        android:fillColor="#121212"
+        android:pathData="M54,34 L68,41 L68,58 C68,67 61,74 54,77 C47,74 40,67 40,58 L40,41 Z" />
+
+    <!-- خط المسح الضوئي (أفقي) -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M42,54 L66,54 L66,57 L42,57 Z" />
+
+    <!-- دائرة المركز (تمثل العين أو العدسة أو الذكاء الاصطناعي) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M36,36h36v8h-36z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M36,50h8v8h-8z M46,50h8v8h-8z M56,50h8v8h-8z M66,50h6v8h-6z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M36,62h8v8h-8z M46,62h8v8h-8z M56,62h8v8h-8z M66,62h6v8h-6z" />
+        android:pathData="M54,52 A5,5 0 1,1 54,62 A5,5 0 1,1 54,52 Z" />
 </vector>
