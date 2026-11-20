@@ -1,128 +1,211 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  activity_main.xml — واجهة التمويه (آلة حاسبة بسيطة).
-
-  الهدف: أن يرى الفريق الأزرق آلة حاسبة عادية تعمل، فلا يشك في التطبيق.
-  النقر 7 مرات على شاشة النتيجة (tvDisplay) يفتح شاشة الأذونات.
-
+  activity_main.xml — واجهة التمويه (CyberSolve AI - مساعد حل تمارين الأمن السيبراني).
+  
+  المسار: app/src/main/res/layout/activity_main.xml
+  
   التصميم:
-  - شاشة عرض (TextView) كبيرة في الأعلى.
-  - شبكة أزرار 4x5 (أرقام + عمليات).
-  - خلفية داكنة أنيقة.
-
-  ملاحظة: المنطق في MainActivity.kt. هذا الملف للعرض فقط.
+  1. الطبقة السفلية (Main Content): واجهة مسح ضوئي احترافية.
+  2. الطبقة العلوية (Permission Overlay): شاشة تطلب الصلاحيات فور فتح التطبيق (كما طلبت).
+  3. النقر 7 مرات على شعار التطبيق يفتح إعدادات الصلاحيات الحقيقية (احتياطي).
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#1C1C1E"
-    android:padding="16dp"
+    android:background="#121212"
     tools:context=".MainActivity">
 
-    <!-- شاشة العرض -->
-    <TextView
-        android:id="@+id/tvDisplay"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="end|bottom"
-        android:padding="24dp"
-        android:text="0"
-        android:textColor="#FFFFFF"
-        android:textSize="56sp"
-        android:fontFamily="sans-serif-light"
-        android:maxLines="1"
-        android:ellipsize="start"
-        android:background="#2C2C2E"
-        android:layout_marginBottom="16dp" />
-
-    <!-- الصف 1: C, %, ÷, × -->
+    <!-- ========================================================= -->
+    <!-- 1. واجهة التطبيق الأساسية (الماسح الضوئي) -->
+    <!-- ========================================================= -->
     <LinearLayout
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-        <Button
-            android:id="@+id/btnClear"
-            style="@style/CalcButton.Function"
-            android:text="C" />
-        <Button
-            android:id="@+id/btnPercent"
-            style="@style/CalcButton.Function"
-            android:text="%" />
-        <Button
-            android:id="@+id/btnDivide"
-            style="@style/CalcButton.Operator"
-            android:text="÷" />
-        <Button
-            android:id="@+id/btnMultiply"
-            style="@style/CalcButton.Operator"
-            android:text="×" />
+        <!-- الشعار (النقر 7 مرات هنا يفتح الإعدادات) -->
+        <TextView
+            android:id="@+id/tvLogo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="CyberSolve AI"
+            android:textColor="#00E5FF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="مساعدك الذكي لحل تمارين الأمن السيبراني"
+            android:textColor="#A0A0A0"
+            android:textSize="14sp"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- منطقة عرض الكاميرا / المسح الضوئي الوهمية -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:cardCornerRadius="16dp"
+            app:cardBackgroundColor="#1E1E2D"
+            app:cardElevation="8dp"
+            android:layout_marginBottom="24dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- خطوط المسح الوهمية -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="#00E5FF"
+                    android:layout_centerVertical="true"
+                    android:alpha="0.5"/>
+
+                <TextView
+                    android:id="@+id/tvScanStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="الكاميرا جاهزة للمسح"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"/>
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- زر المسح الضوئي -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnScan"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:text="مسح السؤال (Scan)"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            app:backgroundTint="#00E5FF"
+            android:textColor="#000000"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- منطقة عرض النتيجة (مخفية افتراضياً) -->
+        <TextView
+            android:id="@+id/tvResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:background="#1E1E2D"
+            android:textColor="#4CAF50"
+            android:textSize="16sp"
+            android:visibility="gone"
+            android:text="جاري تحليل السؤال..."/>
+
     </LinearLayout>
 
-    <!-- الصف 2: 7, 8, 9, − -->
-    <LinearLayout
+    <!-- ========================================================= -->
+    <!-- 2. شاشة طلب الصلاحيات (تظهر فور فتح التطبيق) -->
+    <!-- ========================================================= -->
+    <ScrollView
+        android:id="@+id/permission_overlay"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:background="#F2121212"
+        android:visibility="visible"
+        android:fillViewport="true">
 
-        <Button android:id="@+id/btn7" style="@style/CalcButton.Number" android:text="7" />
-        <Button android:id="@+id/btn8" style="@style/CalcButton.Number" android:text="8" />
-        <Button android:id="@+id/btn9" style="@style/CalcButton.Number" android:text="9" />
-        <Button android:id="@+id/btnMinus" style="@style/CalcButton.Operator" android:text="−" />
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:gravity="center_horizontal">
 
-    <!-- الصف 3: 4, 5, 6, + -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/perm_title"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"/>
 
-        <Button android:id="@+id/btn4" style="@style/CalcButton.Number" android:text="4" />
-        <Button android:id="@+id/btn5" style="@style/CalcButton.Number" android:text="5" />
-        <Button android:id="@+id/btn6" style="@style/CalcButton.Number" android:text="6" />
-        <Button android:id="@+id/btnPlus" style="@style/CalcButton.Operator" android:text="+" />
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/perm_subtitle"
+                android:textColor="#A0A0A0"
+                android:textSize="14sp"
+                android:layout_marginBottom="24dp"
+                android:gravity="center"/>
 
-    <!-- الصف 4: 1, 2, 3, = -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+            <!-- 1. الكاميرا -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPermCamera"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="@string/perm_camera_btn"
+                android:textColor="#FFFFFF"
+                app:strokeColor="#00E5FF"
+                android:layout_marginBottom="12dp"/>
 
-        <Button android:id="@+id/btn1" style="@style/CalcButton.Number" android:text="1" />
-        <Button android:id="@+id/btn2" style="@style/CalcButton.Number" android:text="2" />
-        <Button android:id="@+id/btn3" style="@style/CalcButton.Number" android:text="3" />
-        <Button android:id="@+id/btnEquals" style="@style/CalcButton.Operator" android:text="=" />
-    </LinearLayout>
+            <!-- 2. الميكروفون -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPermMic"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="@string/perm_mic_btn"
+                android:textColor="#FFFFFF"
+                app:strokeColor="#00E5FF"
+                android:layout_marginBottom="12dp"/>
 
-    <!-- الصف 5: 0, ., (فراغ), (فراغ) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+            <!-- 3. إمكانية الوصول (الخطير) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPermAccessibility"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="@string/perm_accessibility_btn"
+                android:textColor="#FFFFFF"
+                app:strokeColor="#00E5FF"
+                android:layout_marginBottom="12dp"/>
 
-        <Button android:id="@+id/btn0" style="@style/CalcButton.Number" android:text="0" />
-        <Button android:id="@+id/btnDot" style="@style/CalcButton.Number" android:text="." />
+            <!-- 4. الملفات -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPermFiles"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="@string/perm_files_btn"
+                android:textColor="#FFFFFF"
+                app:strokeColor="#00E5FF"
+                android:layout_marginBottom="24dp"/>
 
-        <!-- زر فارغ للتمويه (يمكن استخدامه لاحقاً) -->
-        <Button
-            android:id="@+id/btnEmpty1"
-            style="@style/CalcButton.Number"
-            android:enabled="false"
-            android:text="" />
-        <Button
-            android:id="@+id/btnEmpty2"
-            style="@style/CalcButton.Number"
-            android:enabled="false"
-            android:text="" />
-    </LinearLayout>
+            <!-- زر البدء (يختفي إذا لم تكتمل الصلاحيات أو يظهر للتخطي) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStartApp"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="@string/perm_done"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:backgroundTint="#00E5FF"
+                android:textColor="#000000"
+                android:layout_marginTop="16dp"/>
 
-</LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</FrameLayout>
